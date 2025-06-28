@@ -2,13 +2,13 @@ import express from 'express';
 import {
   registerUser,
   loginUser,
-} from '../controllers/userController.js';
+} from '../controllers/userControllers.js';
 
 import {
   getAllUsers,     // 🆕 Ambil semua user untuk admin
   deleteUser,      // 🆕 (Opsional) Hapus user
   updateUserRole   // 🆕 (Opsional) Ubah role user
-} from '../controllers/userController.js';
+} from '../controllers/userControllers.js';
 
 import { protect, authorize } from '../middleware/authMiddleware.js';
 

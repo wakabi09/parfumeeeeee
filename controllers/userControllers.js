@@ -15,9 +15,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Template email HTML
-const ownerEmailTemplate = (name, email) => `
-  <div style="font-family: 'Segoe UI', sans-serif; background-color: #f9f9f9; padding: 30px;">
+const ownerEmailTemplate = (name, email) => `<div style="font-family: 'Segoe UI', sans-serif; background-color: #f9f9f9; padding: 30px;">
     <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
       <div style="background-color: #212529; padding: 20px; text-align: center;">
         <img src="${process.env.APP_LOGO_URL}" alt="MAHA PARFUME" style="height: 50px; margin-bottom: 10px;" />
@@ -37,11 +35,8 @@ const ownerEmailTemplate = (name, email) => `
       </div>
     </div>
   </div>
-`;
-
-
-const adminNotificationTemplate = (name, email) => `
-  <div style="font-family: 'Segoe UI', sans-serif; background-color: #fdfdfd; padding: 30px;">
+`; // [🟡] Gunakan template HTML yang sudah kamu punya
+const adminNotificationTemplate = (name, email) => `<div style="font-family: 'Segoe UI', sans-serif; background-color: #fdfdfd; padding: 30px;">
     <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 10px rgba(0,0,0,0.08);">
       <div style="background-color: #343a40; padding: 20px; text-align: center;">
         <img src="${process.env.APP_LOGO_URL}" alt="MAHA PARFUME" style="height: 50px;" />
@@ -60,7 +55,10 @@ const adminNotificationTemplate = (name, email) => `
       </div>
     </div>
   </div>
-`;
+`;// [🟡] Sama seperti di atas
+
+
+
 
 
 export const registerUser = async (req, res) => {
@@ -89,7 +87,6 @@ export const registerUser = async (req, res) => {
     await newUser.save();
 
     if (role === 'owner') {
-      // Email ke user
       await transporter.sendMail({
         from: process.env.EMAIL_SENDER,
         to: email,
@@ -97,7 +94,6 @@ export const registerUser = async (req, res) => {
         html: ownerEmailTemplate(name, email),
       });
 
-      // Notifikasi ke admin utama
       await transporter.sendMail({
         from: process.env.EMAIL_SENDER,
         to: process.env.ADMIN_NOTIFICATION_EMAIL,
@@ -118,5 +114,75 @@ export const registerUser = async (req, res) => {
   } catch (error) {
     console.error('[REGISTER ERROR]', error);
     res.status(500).json({ message: 'Registrasi gagal', error: error.message });
+  }
+};
+
+export const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Email tidak terdaftar' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Password salah' });
+    }
+
+    const token = generateToken(user._id, user.role);
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token,
+    });
+  } catch (err) {
+    console.error('[LOGIN ERROR]', err);
+    res.status(500).json({ message: 'Login gagal', error: err.message });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const updateUserRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'Role updated', user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
   }
 };

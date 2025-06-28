@@ -27,16 +27,18 @@ const app = express();
 // ✅ CORS Configuration
 // ===========================
 const allowedOrigins = [
-  'http://localhost:5173', // local dev
-  'https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net', // Azure deploy
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net',
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
     if (
-      !origin ||
-      allowedOrigins.includes(origin) ||
-      origin.includes('.scm.azurewebsites.net') // Allow Azure Kudu
+      !origin ||                                       // allow tools seperti Postman
+      allowedOrigins.includes(origin) ||               // allow origin resmi
+      origin.startsWith('http://localhost') ||         // allow semua localhost (5173, 5000, dll)
+      origin.includes('.scm.azurewebsites.net')        // allow Kudu (Azure)
     ) {
       callback(null, true);
     } else {
@@ -45,6 +47,7 @@ app.use(cors({
   },
   credentials: true,
 }));
+
 
 // ===========================
 // ✅ Middleware
