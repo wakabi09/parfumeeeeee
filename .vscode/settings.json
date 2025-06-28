@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/7ada2c62-f2bc-49f1-9407-6ccf55085d8c/resourceGroups/mahaparfum-group/providers/Microsoft.Web/sites/mahaparfum-backend",
+    "appService.deploySubpath": "."
+}
