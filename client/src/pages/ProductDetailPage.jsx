@@ -91,7 +91,7 @@ const ProductDetailPage = () => {
           <p className="lead">{product.description}</p>
           <div className="my-4">
             <h5 className="fw-semibold">Scent Notes:</h5>
-            <p>{product.notes || '-'}</p>
+            <p>{product.scentNotes || '-'}</p>
           </div>
           {product.countInStock > 0 ? (
             <Button variant="dark" size="lg" className="w-100" onClick={handleAddToCart}>
