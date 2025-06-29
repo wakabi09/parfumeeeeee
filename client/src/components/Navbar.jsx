@@ -32,11 +32,13 @@ const NavbarComponent = () => {
             {user ? (
               <NavDropdown title={user.name || user.email} id="user-dropdown">
                 <NavDropdown.Item as={Link} to="/profile">Profil</NavDropdown.Item>
-                {user.role === 'owner' && (
+
+                {(user.role === 'admin' || user.role === 'owner') && (
                   <NavDropdown.Item as={Link} to="/admin/dashboard">
                     Admin Dashboard
                   </NavDropdown.Item>
                 )}
+
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
               </NavDropdown>

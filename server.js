@@ -5,6 +5,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
 
 // Import Routes
 import userRoutes from './routes/userRoutes.js';
@@ -24,6 +25,42 @@ dotenv.config();
 const app = express();
 
 // ===========================
+// ✅ Helmet + CSP Configuration (Pasang lebih awal!)
+// ===========================
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "https://cdn.jsdelivr.net",
+        "'unsafe-inline'",
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://cdn.jsdelivr.net",
+        "https://fonts.googleapis.com",
+      ],
+      fontSrc: [
+        "'self'",
+        "https://fonts.gstatic.com",
+      ],
+      connectSrc: [
+        "'self'",
+        "https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net",
+      ],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https:",
+      ],
+      objectSrc: ["'none'"],
+    },
+  },
+}));
+
+// ===========================
 // ✅ CORS Configuration
 // ===========================
 const allowedOrigins = [
@@ -35,10 +72,10 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, callback) => {
     if (
-      !origin ||                                       // allow tools seperti Postman
-      allowedOrigins.includes(origin) ||               // allow origin resmi
-      origin.startsWith('http://localhost') ||         // allow semua localhost (5173, 5000, dll)
-      origin.includes('.scm.azurewebsites.net')        // allow Kudu (Azure)
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      origin.startsWith('http://localhost') ||
+      origin.includes('.scm.azurewebsites.net')
     ) {
       callback(null, true);
     } else {
@@ -47,16 +84,16 @@ app.use(cors({
   },
   credentials: true,
 }));
-
+app.options('*', cors());
 
 // ===========================
-// ✅ Middleware
+// ✅ Middleware Parsing Body
 // ===========================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ===========================
-// ✅ Serve Static Upload Folder
+// ✅ Static Folder Upload
 // ===========================
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
@@ -70,12 +107,12 @@ app.use('/api/carts', cartRoutes);
 app.use('/api/auth', authRoutes);
 
 // ===========================
-// ✅ Serve React Client (Vite build in /client/dist)
+// ✅ Serve React Build
 // ===========================
 const clientBuildPath = path.join(__dirname, 'client/dist');
 app.use(express.static(clientBuildPath));
 
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
@@ -92,7 +129,7 @@ app.use((err, req, res, next) => {
 // ===========================
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI); // clean version
+    await mongoose.connect(process.env.MONGO_URI);
     console.log(`✅ MongoDB Connected: ${mongoose.connection.name}`);
   } catch (err) {
     console.error('❌ MongoDB Connection Error:', err.message);

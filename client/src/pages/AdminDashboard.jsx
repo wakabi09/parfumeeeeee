@@ -21,7 +21,156 @@ const Sidebar = ({ onSelect, collapsed, toggle }) => (
   </div>
 );
 
-// ... UploadImage & ProductManagement tetap sama
+const UploadImage = () => {
+  const [file, setFile] = useState(null);
+  const [imageList, setImageList] = useState([]);
+
+  const fetchImages = async () => {
+    try {
+      const res = await axios.get('/api/upload/list');
+      setImageList(res.data);
+    } catch (err) {
+      console.error('Gagal ambil gambar:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      await axios.post('/api/upload', formData);
+      setFile(null);
+      fetchImages();
+      Swal.fire('Berhasil', 'Gambar berhasil diupload', 'success');
+    } catch (err) {
+      console.error(err);
+      Swal.fire('Gagal', 'Gagal mengupload gambar', 'error');
+    }
+  };
+
+  return (
+    <div className="content">
+      <h3>Upload Gambar</h3>
+      <form onSubmit={handleUpload} className="mb-3">
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+        <button className="btn btn-primary ms-2" type="submit">Upload</button>
+      </form>
+      <div className="row">
+        {imageList.map((url, i) => (
+          <div className="col-3 mb-3" key={i}>
+            <img src={url} alt="uploaded" className="img-thumbnail" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ProductManagement = () => {
+  const [products, setProducts] = useState([]);
+  const [form, setForm] = useState({ name: '', price: '', scentNotes: '', description: '', image: '' });
+  const [imageOptions, setImageOptions] = useState([]);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get('/api/products');
+      setProducts(res.data);
+    } catch (err) {
+      console.error('Gagal fetch produk:', err);
+    }
+  };
+
+  const fetchImages = async () => {
+    try {
+      const res = await axios.get('/api/upload/list');
+      setImageOptions(res.data);
+    } catch (err) {
+      console.error('Gagal fetch image:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchImages();
+  }, []);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('/api/products', form);
+      fetchProducts();
+      setForm({ name: '', price: '', scentNotes: '', description: '', image: '' });
+      Swal.fire('Berhasil', 'Produk ditambahkan', 'success');
+    } catch (err) {
+      console.error(err);
+      Swal.fire('Gagal', 'Gagal tambah produk', 'error');
+    }
+  };
+
+  return (
+    <div className="content">
+      <h3>Produk</h3>
+      <form onSubmit={handleAdd} className="mb-4">
+        <div className="row g-3">
+          <div className="col-md-6">
+            <input type="text" className="form-control" name="name" placeholder="Nama" value={form.name} onChange={handleChange} required />
+          </div>
+          <div className="col-md-6">
+            <input type="number" className="form-control" name="price" placeholder="Harga" value={form.price} onChange={handleChange} required />
+          </div>
+          <div className="col-md-12">
+            <textarea className="form-control" name="description" placeholder="Deskripsi" value={form.description} onChange={handleChange} required></textarea>
+          </div>
+          <div className="col-md-12">
+            <input type="text" className="form-control" name="scentNotes" placeholder="Scent Notes" value={form.scentNotes} onChange={handleChange} />
+          </div>
+          <div className="col-md-12">
+            <select className="form-select" name="image" value={form.image} onChange={handleChange} required>
+              <option value="">Pilih Gambar</option>
+              {imageOptions.map((img, idx) => (
+                <option key={idx} value={img}>{img}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <button className="btn btn-success mt-3" type="submit">Tambah Produk</button>
+      </form>
+
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Gambar</th>
+            <th>Nama</th>
+            <th>Harga</th>
+            <th>Notes</th>
+            <th>Deskripsi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map(prod => (
+            <tr key={prod._id}>
+              <td><img src={prod.image} alt={prod.name} width="60" /></td>
+              <td>{prod.name}</td>
+              <td>Rp {prod.price}</td>
+              <td>{prod.scentNotes}</td>
+              <td>{prod.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -146,7 +295,7 @@ const DashboardContent = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/api/products')
+    axios.get('/api/products')
       .then(res => setProducts(res.data))
       .catch(err => console.error('Gagal fetch produk:', err));
   }, []);

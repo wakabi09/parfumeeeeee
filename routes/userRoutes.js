@@ -19,8 +19,8 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 
 // Admin-only user management
-router.get('/', protect, authorize('owner'), getAllUsers);        // GET /api/users
-router.delete('/:id', protect, authorize('owner'), deleteUser);   // DELETE /api/users/:id
-router.put('/:id/role', protect, authorize('owner'), updateUserRole); // PUT /api/users/:id/role
+router.get('/', protect, authorize('owner'), getAllUsers);        
+router.delete('/:id', protect, authorize('owner'), deleteUser);   
+router.put('/:id/role', protect, authorize('owner'), updateUserRole); 
 
 export default router;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const LoginPage = () => {
@@ -8,9 +9,10 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
   const from = location.state?.from?.pathname || '/';
 
   const handleLogin = async (e) => {
@@ -26,16 +28,20 @@ const LoginPage = () => {
 
       const { token, name, email: userEmail, role } = res.data;
 
-      // Simpan token dan data user ke localStorage
+      // ✅ Simpan ke localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({ name, email: userEmail, role }));
 
-      // Arahkan ke dashboard admin jika owner, atau ke halaman sebelumnya
-      if (role === 'owner') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate(from, { replace: true });
-      }
+      // ✅ Update context
+      login({ name, email: userEmail, role });
+
+      // ✅ Redirect berdasarkan role
+      if (role === 'owner' || role === 'admin') {
+  navigate('/admin/dashboard', { replace: true });
+} else {
+  navigate(from, { replace: true });
+}
+
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Login gagal');
     } finally {
@@ -90,10 +96,8 @@ const LoginPage = () => {
 
         <div className="mt-3 text-center">
           <small>
-            Belum punya akun?{' '}
-            <Link to="/register">Register</Link>
-          </small>
-          <br />
+            Belum punya akun? <Link to="/register">Register</Link>
+          </small><br />
           <small>
             <Link to="/forgot-password">Lupa password?</Link>
           </small>

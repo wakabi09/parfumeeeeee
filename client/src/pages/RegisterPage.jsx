@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+// src/pages/RegisterPage.jsx
+
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const RegisterPage = () => {
@@ -14,6 +17,7 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const validate = () => {
     const newErrors = {};
@@ -41,7 +45,7 @@ const RegisterPage = () => {
   };
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -57,10 +61,30 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      await axios.post('https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/api/auth/register', formData);
+      const res = await axios.post(
+        'https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/api/auth/register',
+        formData
+      );
 
-      alert('✅ Register berhasil!');
-      navigate('/login');
+      const { token, name, email, role } = res.data;
+
+      // Simpan ke localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({ name, email, role }));
+
+      // Set ke context
+      login({ name, email, role });
+
+      // Redirect berdasarkan role
+      if (role === 'owner' || role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+
+      // Reset form
+      setFormData({ name: '', email: '', password: '', adminCode: '' });
+
     } catch (err) {
       const msg = err.response?.data?.message || 'Gagal mendaftar';
       setErrors({ server: msg });

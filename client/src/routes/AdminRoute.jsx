@@ -6,12 +6,19 @@ const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
+  // 🔍 Debugging sementara:
+  console.log('AdminRoute: loading=', loading, 'user=', user);
+
   if (loading) {
     return <div className="text-center mt-5">Memuat data...</div>;
   }
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (!user.role) {
+    return <div className="text-center mt-5 text-danger">❗ Peran tidak terbaca...</div>;
   }
 
   if (user.role !== 'owner') {
