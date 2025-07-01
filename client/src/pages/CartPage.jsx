@@ -7,7 +7,15 @@ import {
 import { FaTrash } from 'react-icons/fa';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, getCartTotal, clearCart } = useCart();
+  const {
+    cartItems,
+    removeFromCart,
+    getCartTotal,
+    clearCart,
+    increaseQty,
+    decreaseQty,
+  } = useCart();
+
   const [showPayment, setShowPayment] = useState(false);
   const navigate = useNavigate();
 
@@ -21,9 +29,9 @@ const CartPage = () => {
   const handlePaymentClick = () => setShowPayment(true);
 
   const handleConfirmPayment = () => {
-    clearCart(); // Kosongkan keranjang
-    setShowPayment(false); // Tutup modal
-    navigate('/thankyou'); // Arahkan ke halaman thank you
+    clearCart();
+    setShowPayment(false);
+    navigate('/thankyou');
   };
 
   if (cartItems.length === 0) {
@@ -44,19 +52,30 @@ const CartPage = () => {
         <Col md={8}>
           <ListGroup variant="flush">
             {cartItems.map((item) => (
-              <ListGroup.Item key={item.id} className="d-flex justify-content-between align-items-center">
+              <ListGroup.Item key={item.id} className="d-flex align-items-center">
                 <Image
-                 src={item.image.startsWith('http') ? item.image : `https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/assets/${item.image}`}
-                 alt={item.name}
-                 style={{ width: '80px' }}
-                 rounded
-                 />
-                <div className="flex-grow-1 ms-3">
-                  <h5 className="mb-0">{item.name}</h5>
+                  src={item.image.startsWith('http') ? item.image : `https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/assets/${item.image}`}
+                  alt={item.name}
+                  style={{ width: '80px' }}
+                  rounded
+                />
+
+                <div className="ms-3 flex-grow-1">
+                  <h5 className="mb-1">{item.name}</h5>
                   <small className="text-muted">{formatCurrency(item.price)} x {item.quantity}</small>
+
+                  <div className="d-flex align-items-center gap-2 mt-2">
+                    <Button variant="outline-secondary" size="sm" onClick={() => decreaseQty(item._id)}>-</Button>
+                    <span>{item.quantity}</span>
+                    <Button variant="outline-secondary" size="sm" onClick={() => increaseQty(item._id)}>+</Button>
+                  </div>
                 </div>
-                <div className="fw-bold me-3">{formatCurrency(item.price * item.quantity)}</div>
-                <Button variant="outline-danger" size="sm" onClick={() => removeFromCart(item.id)}>
+
+                <div className="fw-bold me-3">
+                  {formatCurrency(item.price * item.quantity)}
+                </div>
+
+                <Button variant="outline-danger" size="sm" onClick={() => removeFromCart(item._id)}>
                   <FaTrash />
                 </Button>
               </ListGroup.Item>
@@ -99,7 +118,9 @@ const CartPage = () => {
             alt="QRIS"
             className="img-fluid border rounded"
           />
-          <p className="text-muted mt-3"><small>Setelah melakukan pembayaran, klik tombol di bawah ini.</small></p>
+          <p className="text-muted mt-3">
+            <small>Setelah melakukan pembayaran, klik tombol di bawah ini.</small>
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="success" onClick={handleConfirmPayment}>
