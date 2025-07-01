@@ -19,6 +19,7 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+
   const decreaseQty = (productId) => {
     setCartItems((prevItems) =>
       prevItems
@@ -41,6 +42,27 @@ export const CartProvider = ({ children }) => {
       prevItems.map((item) =>
         item._id === productId ? { ...item, quantity: item.quantity + 1 } : item
       )
+    );
+  };
+
+=======
+  const increaseQty = (productId) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
+
+  const decreaseQty = (productId) => {
+    setCartItems((prevItems) =>
+      prevItems
+        .map((item) =>
+          item.id === productId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
     );
   };
 

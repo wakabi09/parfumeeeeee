@@ -24,7 +24,8 @@ const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
 const CareTipsPage = lazy(() => import('./pages/CareTipsPage'));
-const AccessDeniedPage = lazy(() => import('./pages/AccessDeniedPage')); // ⬅️ Tambahan
+const AccessDeniedPage = lazy(() => import('./pages/AccessDeniedPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage')); // Ini sudah ada dan benar
 
 const AppContent = () => {
   const { loading } = useAuth();
@@ -64,6 +65,16 @@ const AppContent = () => {
                 </PrivateRoute>
               }
             />
+            {/* START PENAMBAHAN UNTUK PROFILEPAGE */}
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <ProfilePage />
+                </PrivateRoute>
+              }
+            />
+            {/* END PENAMBAHAN UNTUK PROFILEPAGE */}
 
             {/* Admin Area */}
             <Route
