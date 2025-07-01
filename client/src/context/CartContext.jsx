@@ -1,9 +1,12 @@
 import React, { createContext, useState, useContext } from 'react';
 
+// 1. Buat context
 const CartContext = createContext();
 
+// 2. Custom hook untuk akses context
 export const useCart = () => useContext(CartContext);
 
+// 3. Provider untuk membungkus aplikasi
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
@@ -19,6 +22,13 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  const increaseQty = (productId) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item._id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
 
   const decreaseQty = (productId) => {
     setCartItems((prevItems) =>
@@ -28,7 +38,7 @@ export const CartProvider = ({ children }) => {
             if (item.quantity > 1) {
               return { ...item, quantity: item.quantity - 1 };
             }
-            return null; // akan di-filter nanti
+            return null;
           }
           return item;
         })
@@ -36,39 +46,10 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-
-  const increaseQty = (productId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item._id === productId ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
-
-=======
-  const increaseQty = (productId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
-
-  const decreaseQty = (productId) => {
-    setCartItems((prevItems) =>
-      prevItems
-        .map((item) =>
-          item.id === productId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-
   const removeFromCart = (productId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item._id !== productId));
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => item._id !== productId)
+    );
   };
 
   const getCartTotal = () => {
@@ -79,20 +60,22 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  const clearCart = () => setCartItems([]);
 
   const value = {
     cartItems,
     addToCart,
+    increaseQty,
+    decreaseQty,
     removeFromCart,
     getCartTotal,
     getCartCount,
-    increaseQty,
-    decreaseQty,
     clearCart,
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  );
 };

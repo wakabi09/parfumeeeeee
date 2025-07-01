@@ -52,7 +52,7 @@ const CartPage = () => {
         <Col md={8}>
           <ListGroup variant="flush">
             {cartItems.map((item) => (
-              <ListGroup.Item key={item.id} className="d-flex align-items-center">
+              <ListGroup.Item key={item._id} className="d-flex align-items-center">
                 <Image
                   src={item.image.startsWith('http') ? item.image : `https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/assets/${item.image}`}
                   alt={item.name}
@@ -65,15 +65,9 @@ const CartPage = () => {
                   <small className="text-muted">{formatCurrency(item.price)} x {item.quantity}</small>
 
                   <div className="d-flex align-items-center gap-2 mt-2">
-
                     <Button variant="outline-secondary" size="sm" onClick={() => decreaseQty(item._id)}>-</Button>
                     <span>{item.quantity}</span>
                     <Button variant="outline-secondary" size="sm" onClick={() => increaseQty(item._id)}>+</Button>
-
-                    <Button variant="outline-secondary" size="sm" onClick={() => decreaseQty(item.id)}>-</Button>
-                    <span>{item.quantity}</span>
-                    <Button variant="outline-secondary" size="sm" onClick={() => increaseQty(item.id)}>+</Button>
-
                   </div>
                 </div>
 
@@ -81,11 +75,7 @@ const CartPage = () => {
                   {formatCurrency(item.price * item.quantity)}
                 </div>
 
-
                 <Button variant="outline-danger" size="sm" onClick={() => removeFromCart(item._id)}>
-
-                <Button variant="outline-danger" size="sm" onClick={() => removeFromCart(item.id)}>
-
                   <FaTrash />
                 </Button>
               </ListGroup.Item>
