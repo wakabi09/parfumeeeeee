@@ -65,9 +65,15 @@ const CartPage = () => {
                   <small className="text-muted">{formatCurrency(item.price)} x {item.quantity}</small>
 
                   <div className="d-flex align-items-center gap-2 mt-2">
+
+                    <Button variant="outline-secondary" size="sm" onClick={() => decreaseQty(item._id)}>-</Button>
+                    <span>{item.quantity}</span>
+                    <Button variant="outline-secondary" size="sm" onClick={() => increaseQty(item._id)}>+</Button>
+
                     <Button variant="outline-secondary" size="sm" onClick={() => decreaseQty(item.id)}>-</Button>
                     <span>{item.quantity}</span>
                     <Button variant="outline-secondary" size="sm" onClick={() => increaseQty(item.id)}>+</Button>
+
                   </div>
                 </div>
 
@@ -75,7 +81,11 @@ const CartPage = () => {
                   {formatCurrency(item.price * item.quantity)}
                 </div>
 
+
+                <Button variant="outline-danger" size="sm" onClick={() => removeFromCart(item._id)}>
+
                 <Button variant="outline-danger" size="sm" onClick={() => removeFromCart(item.id)}>
+
                   <FaTrash />
                 </Button>
               </ListGroup.Item>
