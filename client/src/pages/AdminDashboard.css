@@ -8,20 +8,34 @@
 .sidebar {
   background-color: #343a40;
   color: white;
-  padding: 1rem;
-  width: 240px;
+  width: 260px;
   height: 100vh;
-  transition: all 0.3s ease;
-  position: relative;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 1050;
+  padding: 1rem;
+  display: none;
+  flex-direction: column;
 }
+
+.sidebar.show {
+  display: flex;
+  transform: translateX(0);
+}
+
 .sidebar.collapsed {
   width: 0;
   padding: 0;
   overflow: hidden;
 }
-.sidebar-container {
-  transition: width 0.3s ease;
-  width: 240px;
+
+.sidebar-container .toggle-btn {
+  margin-left: 10px;
+  top: 60px;
+  left: 10px;
 }
 
 .sidebar-container.collapsed {
@@ -31,7 +45,13 @@
 
 .sidebar h2 {
   font-size: 1.5rem;
-  margin-bottom: 1rem;
+  margin: 20px 0 1rem 0; 
+  padding-left: 5px;
+}
+
+.content > h3 {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .sidebar ul {
@@ -48,46 +68,67 @@
   background-color: #495057;
 }
 
-.sidebar .toggle-btn {
-  position: absolute;
-  top: 10px;
+.toggle-btn {
+  position: fixed;
+  top: 70px; /* di bawah navbar */
   left: 10px;
-  z-index: 1000;
-  background: none;
+  background: transparent;
   border: none;
   font-size: 24px;
-  color: #b39ddb;
+  color: #333;
   cursor: pointer;
+  z-index: 1100;
+}
+
+.toggle-btn:hover {
+  color: #6c757d; /* efek hover ringan */
+}
+
+.close-btn {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.sidebar-container.collapsed {
+  width: 0;
+  overflow: visible;
+}
+
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+@media (min-width: 769px) {
+  .sidebar {
+    transform: translateX(0);
+    position: relative;
+    top: 0 !important;
+  }
+  .sidebar.collapsed {
+    transform: translateX(-240px);
+  }
 }
 
 .main {
   flex: 1;
   padding: 1rem;
   background-color: #f8f9fa;
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    position: absolute;
-    z-index: 999;
-    height: 100vh;
-    left: 0;
-    top: 0;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
+@media (min-width: 768px) {
+  .toggle-btn.hidden-desktop {
+    display: none;
   }
+}
 
-  .sidebar.show {
-    transform: translateX(0);
-  }
-
-  .main {
-    margin-left: 0;
-  }
-
-  .toggle-btn {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-  }
+.d-none {
+  display: none !important;
 }

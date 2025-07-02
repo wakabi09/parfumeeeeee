@@ -6,30 +6,22 @@ import './AdminDashboard.css';
 
 // ===== Sidebar =====
 const Sidebar = ({ onSelect, collapsed, toggle }) => (
-  <div className={`sidebar-container ${collapsed ? 'collapsed' : ''}`}>
-    <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-      {/* Tombol toggle selalu tampil */}
-      <button className="toggle-btn" onClick={toggle}>
-        {collapsed ? '☰' : '✖'}
-      </button>
-
-      {/* Konten hanya muncul jika sidebar tidak collapsed */}
-      {!collapsed && (
-        <>
-          <h2>Admin Panel</h2>
-          <ul>
-            <li onClick={() => onSelect('dashboard')}>Dashboard</li>
-            <li onClick={() => onSelect('upload')}>Upload Gambar</li>
-            <li onClick={() => onSelect('products')}>Products</li>
-            <li onClick={() => onSelect('users')}>User Management</li>
-            <li onClick={() => onSelect('cart')}>Cart</li>
-          </ul>
-        </>
-      )}
-    </div>
+  <div className={`sidebar ${!collapsed ? 'show' : ''}`}>
+    {!collapsed && (
+      <>
+        <button className="close-btn" onClick={toggle}>✖</button>
+        <h2>Admin Panel</h2>
+        <ul>
+          <li onClick={() => onSelect('dashboard')}>Dashboard</li>
+          <li onClick={() => onSelect('upload')}>Upload Gambar</li>
+          <li onClick={() => onSelect('products')}>Products</li>
+          <li onClick={() => onSelect('users')}>User Management</li>
+          <li onClick={() => onSelect('cart')}>Cart</li>
+        </ul>
+      </>
+    )}
   </div>
 );
-
 
 
 
@@ -406,10 +398,30 @@ const DashboardContent = () => {
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setCollapsed(false);
+      } else {
+        setCollapsed(true);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="admin-container d-flex">
+      <button
+      className={`toggle-btn ${!collapsed && window.innerWidth >= 768 ? 'd-none' : ''}`}
+      onClick={() => setCollapsed(!collapsed)}
+      >
+        ☰
+      </button>
       <Sidebar onSelect={setActiveTab} collapsed={collapsed} toggle={() => setCollapsed(!collapsed)} />
       <div className="main p-3 w-100">
         {activeTab === 'dashboard' && <DashboardContent />}
@@ -421,5 +433,7 @@ const AdminDashboard = () => {
     </div>
   );
 };
+
+
 
 export default AdminDashboard;
