@@ -4,7 +4,7 @@ import NavbarComponent from './components/Navbar';
 import Footer from './components/Footer';
 import AdminRoute from './routes/AdminRoute';
 import PrivateRoute from './routes/PrivateRoute';
-import { AuthProvider } from './context/AuthProvider';
+import  AuthProvider  from './context/AuthProvider';
 import useAuth from './hooks/useAuth';
 import LoadingScreen from './components/LoadingScreen';
 

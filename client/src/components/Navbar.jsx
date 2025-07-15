@@ -3,32 +3,30 @@ import { Navbar, Nav, Container, Badge, NavDropdown } from 'react-bootstrap';
 import { Link, useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
 import { FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
-import useAuth from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext'; // ✅ BENAR
 
 const NavbarComponent = () => {
   const { getCartCount } = useCart();
   const cartCount = getCartCount();
   const navigate = useNavigate();
-  const location = useLocation(); // Inisialisasi useLocation
+  const location = useLocation();
+  const { user, logout, loading } = useAuth(); // ✅ tambahkan loading
 
-  const { user, logout } = useAuth();
-
-  // State untuk mengontrol expanded/collapsed status navbar
   const [expanded, setExpanded] = useState(false);
-
-  // Fungsi untuk menutup navbar collapse
   const closeNavbar = () => setExpanded(false);
 
-  // Gunakan useEffect untuk menutup navbar saat lokasi berubah
   useEffect(() => {
     closeNavbar();
-  }, [location]); // Bergantung pada 'location' agar efek berjalan setiap kali URL berubah
+  }, [location]);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
-    closeNavbar(); // Pastikan navbar juga tertutup saat logout
+    closeNavbar();
   };
+
+  // ✅ TUNGGU sampai loading selesai
+  if (loading) return null;
 
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm sticky-top" expanded={expanded} onToggle={() => setExpanded(!expanded)}>
@@ -37,7 +35,6 @@ const NavbarComponent = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto align-items-center">
-            {/* Setiap Nav.Link dan NavDropdown.Item harus memanggil closeNavbar */}
             <Nav.Link as={Link} to="/" onClick={closeNavbar}>Home</Nav.Link>
             <Nav.Link as={Link} to="/collection" onClick={closeNavbar}>Collection</Nav.Link>
             <Nav.Link as={Link} to="/teams" onClick={closeNavbar}>Teams</Nav.Link>
@@ -46,13 +43,11 @@ const NavbarComponent = () => {
             {user ? (
               <NavDropdown title={user.name || user.email} id="user-dropdown">
                 <NavDropdown.Item as={Link} to="/profile" onClick={closeNavbar}>Profil</NavDropdown.Item>
-
                 {(user.role === 'admin' || user.role === 'owner') && (
                   <NavDropdown.Item as={Link} to="/admin/dashboard" onClick={closeNavbar}>
                     Admin Dashboard
                   </NavDropdown.Item>
                 )}
-
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
               </NavDropdown>
@@ -74,5 +69,6 @@ const NavbarComponent = () => {
     </Navbar>
   );
 };
+
 
 export default NavbarComponent;
