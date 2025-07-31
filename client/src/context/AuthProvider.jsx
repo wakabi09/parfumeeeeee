@@ -1,4 +1,3 @@
-// src/context/AuthProvider.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
@@ -11,31 +10,28 @@ export default function AuthProvider({ children }) {
   useEffect(() => {
     const loadUserFromStorage = async () => {
       const token = localStorage.getItem('token');
-      const savedUser = localStorage.getItem('user');
 
       if (token) {
         try {
-          const config = { headers: { Authorization: `Bearer ${token}` } };
+          // Set header otorisasi untuk semua request axios setelah ini
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          
           const { data } = await axios.get(
-            'https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/api/users/profile',
-            config
+            'https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/api/users/profile'
           );
 
-          setUser(data); // jika sukses, pakai dari server
+          setUser(data); // Jika sukses, pakai data dari server
 
         } catch (error) {
           console.error("❌ Gagal mengambil profil user dari token:", error);
-
-          if (savedUser) {
-            setUser(JSON.parse(savedUser)); // fallback ke localStorage
-            console.warn("⚠️ Menggunakan user dari localStorage");
-          } else {
-            localStorage.removeItem('token');
-            setUser(null);
-          }
+          
+          // Token tidak valid, hapus dari storage
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          delete axios.defaults.headers.common['Authorization'];
+          setUser(null);
         }
       }
-
       setLoading(false);
     };
 
@@ -44,25 +40,40 @@ export default function AuthProvider({ children }) {
 
   // ✅ Fungsi login — dipanggil dari LoginPage.jsx
   const login = async (email, password) => {
-    const { data } = await axios.post(
-      'https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/api/auth/login',
-      { email, password }
-    );
+    try {
+      // Menggunakan 'email' karena 'username' menyebabkan error 400
+      const { data } = await axios.post(
+        'https://mahaparfum-dhbdeyasgzhbg9ct.southeastasia-01.azurewebsites.net/api/auth/login',
+        { 
+          email: email, 
+          password: password 
+        }
+      );
 
-    if (data.token) {
-      const userToStore = {
-        name: data.name,
-        email: data.email,
-        role: data.role,
-      };
+      if (data.token) {
+        const userToStore = {
+          name: data.name,
+          email: data.email,
+          role: data.role,
+        };
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(userToStore)); // penting!
-      setUser(userToStore);
+        // Simpan token dan user data
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(userToStore));
+        
+        // Set header otorisasi untuk semua request axios selanjutnya
+        axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
 
-      return { ...data, user: userToStore };
-    } else {
-      throw new Error('Login gagal, token tidak ditemukan');
+        setUser(userToStore);
+
+        return { success: true, user: userToStore };
+      } else {
+        throw new Error('Login gagal, token tidak ditemukan');
+      }
+    } catch (error) {
+      console.error("❌ Error saat login:", error.response ? error.response.data : error.message);
+      // Lempar error agar bisa ditangkap di komponen Login
+      throw error;
     }
   };
 
@@ -70,13 +81,16 @@ export default function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Hapus header otorisasi dari axios
+    delete axios.defaults.headers.common['Authorization'];
+    
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, token: localStorage.getItem('token') }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   );
-  
 }
