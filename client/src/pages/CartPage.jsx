@@ -12,8 +12,7 @@ const CartPage = () => {
     removeFromCart,
     getCartTotal,
     clearCart,
-    increaseQty,
-    decreaseQty,
+    updateQty, // Diganti dari increase/decreaseQty menjadi updateQty
   } = useCart();
 
   const [showPayment, setShowPayment] = useState(false);
@@ -64,10 +63,11 @@ const CartPage = () => {
                   <h5 className="mb-1">{item.name}</h5>
                   <small className="text-muted">{formatCurrency(item.price)} x {item.quantity}</small>
 
+                  {/* --- PERUBAHAN DI SINI --- */}
                   <div className="d-flex align-items-center gap-2 mt-2">
-                    <Button variant="outline-secondary" size="sm" onClick={() => decreaseQty(item._id)}>-</Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => updateQty(item._id, item.quantity - 1)}>-</Button>
                     <span>{item.quantity}</span>
-                    <Button variant="outline-secondary" size="sm" onClick={() => increaseQty(item._id)}>+</Button>
+                    <Button variant="outline-secondary" size="sm" onClick={() => updateQty(item._id, item.quantity + 1)}>+</Button>
                   </div>
                 </div>
 
